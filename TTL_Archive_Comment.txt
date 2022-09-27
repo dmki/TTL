@@ -1,0 +1,6 @@
+Time To Leave 3.0.0
+(c)2016 Dmitry Kirsanov http://kirsanov.net
+This application is freeware
+-
+This package contains executable file of TTL (requires .NET 4.5) and executable file of SDelete by SysInternals, as TTL is using it when doing secure erase of files.
+Both are command line utilities.
