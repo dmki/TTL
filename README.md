@@ -8,3 +8,9 @@ The usual usage scenarios are:
 * Clean up server logs - depending on free disk space, number of files, age etc
 
 Files can be deleted normally, securely (i.e. you probably couldn't restore them, unless there is a version control) and to recycle bin.
+
+## System Requirements
+.NET Framework 4.5 on any Windows that supports it
+
+## Installation
+Release section contains link to EXE and 7z files. Use EXE to install TTL on your machine - this will copy additional scripts and create scheduled task (which will be disabled until you enable it). The 7z file contains only main ttl.exe file.
