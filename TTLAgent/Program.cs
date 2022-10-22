@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
+using Microsoft.Win32;
 using SearchOption = System.IO.SearchOption;
 
 namespace TTLAgent
@@ -18,7 +19,6 @@ namespace TTLAgent
     {
         private static bool _verbose;
         private static bool _quiet;
-        private static bool _local;//direct database connection, no web service
         private static bool _testMode;
         private static bool _noquest;
         private static bool _rmdir;
@@ -33,12 +33,14 @@ namespace TTLAgent
         private static bool _ede;
         private static int _fileCount;
         private static int _dirCount;
+        private static bool _longPathsEnabled;
         private static byte[] _bytez;//Used to overwrite files with bfg
         private static int _keepalive = 0;//How many files to keep alive
 
         //private const int _maxFiles = 1000;//Max files to delete at once
         //private const int _maxDirs = 1000;//Max directories to delete at once
         private const int _maxPath = 260;//Max path length
+        private const int _maxDirPathLength = 248;//Max directory path length
 
         [STAThread()]
         static void Main(string[] args)
@@ -147,6 +149,8 @@ namespace TTLAgent
                 RecycleBinHelper.DeleteOldFiles(DateTime.Now.AddDays(_days * -1));
                 return;
             }
+
+            CheckLongPathsEnabled();
             //Process the file or directory
             string targetName = args[0];
             var isDir = IsDirectory(targetName);
@@ -176,13 +180,13 @@ namespace TTLAgent
 
         private static void ProcessFile(string path)
         {
-            if (path.Length > _maxPath) return;
+            if (path.Length > _maxPath &! _longPathsEnabled) return;
             bool result;
             var fi = new FileInfo(path);
             if (_days > 0)
             {//Check if this file is too old
                 var fileDate = fi.CreationTime;
-                if (fi.LastWriteTime > fileDate) fileDate = fi.LastWriteTime;
+                if (fi.LastWriteTime > fileDate && fi.LastWriteTime < DateTime.Now) fileDate = fi.LastWriteTime;
                 if ((DateTime.Now - fileDate).TotalDays > _days)
                 {
                     result = DeleteFile(path);
@@ -282,6 +286,7 @@ namespace TTLAgent
 
         private static void FixFilePermissions(string path)
         {
+            if (path.Length > _maxDirPathLength &! _longPathsEnabled) return;
             FileAttributes fa = File.GetAttributes(path);
             if ((fa & FileAttributes.ReadOnly) != 0)//ReadOnly file, fix it
             {
@@ -297,6 +302,7 @@ namespace TTLAgent
 
         private static void ProcessDirectory(string path)
         {
+            if (path.Length > _maxDirPathLength &! _longPathsEnabled) return;
             //1. Process all files in this directory
             var files = new List<string>();
             SearchOption so = SearchOption.TopDirectoryOnly;
@@ -385,6 +391,11 @@ namespace TTLAgent
             return null;
         }
 
+        private static void CheckLongPathsEnabled()
+        {
+            var lpe = Convert.ToInt32 (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem", "LongPathsEnabled", 0));
+            _longPathsEnabled = lpe > 0;
+        }
         private static bool GetUserConsent(string prompt)
         {
             begin:
