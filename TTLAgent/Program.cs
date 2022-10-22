@@ -36,6 +36,10 @@ namespace TTLAgent
         private static byte[] _bytez;//Used to overwrite files with bfg
         private static int _keepalive = 0;//How many files to keep alive
 
+        //private const int _maxFiles = 1000;//Max files to delete at once
+        //private const int _maxDirs = 1000;//Max directories to delete at once
+        private const int _maxPath = 260;//Max path length
+
         [STAThread()]
         static void Main(string[] args)
         {
@@ -172,8 +176,7 @@ namespace TTLAgent
 
         private static void ProcessFile(string path)
         {
-            //if (path.Length > 240) return;
-            if (path.Length > 250) return;
+            if (path.Length > _maxPath) return;
             bool result;
             var fi = new FileInfo(path);
             if (_days > 0)
