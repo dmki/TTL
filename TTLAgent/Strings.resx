@@ -124,7 +124,7 @@
     <value>Type ? or HELP for help. Empty command line means exit.</value>
   </data>
   <data name="Copyright" xml:space="preserve">
-    <value>©2016. Dmitry Kirsanov. http://kirsanov.net</value>
+    <value>©2016 - {0}. Dmitry Kirsanov. https://kirsanov.net</value>
   </data>
   <data name="EventLogPrepFailed" xml:space="preserve">
     <value>Event Log could not be prepared. Ensure you have admin privileges.</value>

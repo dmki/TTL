@@ -51,7 +51,7 @@ namespace TTLAgent
             const string clientName = "Time To Leave";
             Console.WriteLine(clientName);
             Console.WriteLine(new string('-', clientName.Length));
-            Console.WriteLine(Strings.Copyright);
+            Console.WriteLine(string.Format(Strings.Copyright, DateTime.Now.Year));
             Console.ForegroundColor = oldColor;
             //Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("version {0}.{1}.{2}", thisVersion.Major, thisVersion.Minor, thisVersion.Revision);
