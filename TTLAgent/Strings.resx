@@ -155,6 +155,7 @@ Parameters:
 /mask:[file mask]	Only process files with this mask. E.g. *.txt means text files. You can separate multiple masks by comma.
 /noempty		Delete empty sub-directories.
 /recycle	Delete to recycle bin.
+/compress	Compress files using NTFS compression instead of deleting
 /rmdir		Delete directory itself, with all contents. Otherwise only files will be deleted.
 /secure		Securely delete files - slow but secure.
 /subs		Delete files in sub-directories.

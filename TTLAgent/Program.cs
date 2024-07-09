@@ -106,7 +106,6 @@ namespace TTLAgent
                 _km = KillMethod.BFG;
                 _bytez = Encoding.ASCII.GetBytes(new string((char)0, 32768));
             }
-
             
             bool daysSet = false;
             foreach (var arg in args)
@@ -151,6 +150,12 @@ namespace TTLAgent
             }
 
             CheckLongPathsEnabled();
+            // Sorting related parameters
+            var sort = args.Contains("/sort");
+            if (sort)
+            {
+                PrintConsole("This function is not implemented yet.");
+            }
             //Process the file or directory
             string targetName = args[0];
             var isDir = IsDirectory(targetName);
@@ -313,7 +318,7 @@ namespace TTLAgent
                 {
                     if (_keepalive == 0)
                     {
-                        files.AddRange(Directory.EnumerateFiles(path, mask, so));
+                        files.AddRange(SafeEnumerateFiles(path, mask, so));
                         continue;
                     }
                     var di = new DirectoryInfo(path);
@@ -334,7 +339,7 @@ namespace TTLAgent
                 }
                 catch (Exception ex)
                 {
-                    
+
                 }
             }
             //Process files
@@ -353,7 +358,7 @@ namespace TTLAgent
                     {
                         try
                         {
-                            if (Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories).Any()) continue;
+                            if (SafeEnumerateFiles(dir, "*", SearchOption.AllDirectories).Any()) continue;
                             //the directory is empty, kill it!
                             PrintConsole("Deleting empty directory " + dir);
                             if (_testMode)
@@ -578,6 +583,69 @@ namespace TTLAgent
                 result += alphabet[rnd.Next(alphabet.Length)];
             }
             return result;
+        }
+        /// <summary>
+        /// Enumerates files in a directory, handling UnauthorizedAccessExceptions and other exceptions.
+        /// </summary>
+        /// <param name="rootPath">Root directory from which to begin search</param>
+        /// <param name="searchPattern">File name mask, e.g. *.txt</param>
+        /// <param name="searchOption"></param>
+        /// <returns></returns>
+        static IEnumerable<string> SafeEnumerateFiles(string rootPath, string searchPattern, SearchOption searchOption)
+        {
+            Queue<string> folders = new Queue<string>();
+            folders.Enqueue(rootPath);
+
+            while (folders.Count > 0)
+            {
+                string currentFolder = folders.Dequeue();
+                IEnumerable<string> files = null;
+                IEnumerable<string> subDirs = null;
+
+                try
+                {
+                    files = Directory.EnumerateFiles(currentFolder, searchPattern);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Skip this folder
+                    PrintConsole($"Access to {rootPath} denied. Try to run this application with administrator privileges.", MessageType.Warning, true);
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception accessing files in folder {currentFolder}: {ex.Message}");
+                    continue;
+                }
+
+                foreach (string file in files)
+                {
+                    yield return file;
+                }
+
+                if (searchOption == SearchOption.AllDirectories)
+                {
+                    try
+                    {
+                        subDirs = Directory.EnumerateDirectories(currentFolder);
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        // Skip this folder
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Exception accessing subdirectories in folder {currentFolder}: {ex.Message}");
+                        continue;
+                    }
+
+                    foreach (string subDir in subDirs)
+                    {
+                        folders.Enqueue(subDir);
+                    }
+                }
+            }
         }
     }
 
