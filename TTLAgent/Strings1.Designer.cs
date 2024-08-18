@@ -79,7 +79,7 @@ namespace TTLAgent {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ©2016 - {0}. Dmitry Kirsanov. https://kirsanov.net.
+        ///   Looks up a localized string similar to ©2016 - {0}. Dmitry Kirsanov. https://github.com/dmki/TTL.
         /// </summary>
         internal static string Copyright {
             get {

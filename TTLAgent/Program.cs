@@ -26,7 +26,7 @@ namespace TTLAgent
         private static bool _noEmpty;//Delete empty directories
         private static KillMethod _km;
         private static int _days;
-        private static int _freeSpace;
+        private static int _freeSpace; //Free space in MB, specified with /free:xxx. Only delete files if free space is less than this.
         private static string[] _masks;
         private static bool _sdwarned;//Used to not show the sdelete warning twice
         private static bool _noEventLog;
@@ -308,6 +308,17 @@ namespace TTLAgent
         private static void ProcessDirectory(string path)
         {
             if (path.Length > _maxDirPathLength &! _longPathsEnabled) return;
+            // Check, if we should process this directory, or user specified the disk free space limit, over which we should stop deleting files.
+            if (_freeSpace > 0)
+            {
+                var drive = new DriveInfo(Path.GetPathRoot(path));
+                if (drive.AvailableFreeSpace > _freeSpace * 1024 * 1024) // Note: AvailableFreeSpace is in bytes and it's per user, not per drive.
+                {
+                    PrintConsole($"The free space on {drive.Name} is more than {_freeSpace} MB. Skipping this directory.");
+                    return;
+                }
+            }
+
             //1. Process all files in this directory
             var files = new List<string>();
             SearchOption so = SearchOption.TopDirectoryOnly;
@@ -361,14 +372,13 @@ namespace TTLAgent
                             if (SafeEnumerateFiles(dir, "*", SearchOption.AllDirectories).Any()) continue;
                             //the directory is empty, kill it!
                             PrintConsole("Deleting empty directory " + dir);
+                            _dirCount++;
                             if (_testMode)
                             {
                                 PrintConsole("TEST MODE: Would delete directory " + dir);
-                                _dirCount++;
                                 continue;
                             }
                             Directory.Delete(dir, true);
-                            _dirCount++;
                         }
                         catch (Exception ex)
                         {

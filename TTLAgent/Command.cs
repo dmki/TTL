@@ -91,7 +91,6 @@ namespace TTLAgent
             Process thisProcess;
             try
             {
-                //if (Verbose) Program.WriteEventLog(string.Format("Executing command {0} with parameters {1}.", Line, Arguments), EventLogEntryType.Information, 0);
                 thisProcess = Process.Start(startInfo);
             }
             catch (Exception)
@@ -121,27 +120,10 @@ namespace TTLAgent
             {
                 //Do we expect any exit code?
                 int returnCode = thisProcess.ExitCode;
-                //if (Verbose) Program.WriteEventLog(string.Format("Executing {0} with parameters {1} returned error code {2}.", Line, Arguments, returnCode.ToString()), EventLogEntryType.Information, 0);
                 //Do we have to do something on fail?
-                //Program.WriteEventLog(string.Format("Process {0} exited with error code {1}", Name, returnCode.ToString()), EventLogEntryType.Information, 0);
                 if (returnCode != ExpectCode)
                 {
-                    Console.WriteLine(string.Format("Process {0} exited with error code {1} which differs from expected code {2}", Name, returnCode, ExpectCode));
-                    //Program.WriteEventLog(string.Format("Process {0} exited with error code {1} which differs from expected code {2}", Name, returnCode, ExpectCode), EventLogEntryType.Error, 2);
-                    //switch (_onFail)
-                    //{
-                    //    case DefaultAction.Continue:
-                    //        return true;
-                    //    case DefaultAction.Cancel:
-                    //        Environment.Exit((int) ShellExitCode.CancelInstall);
-                    //        break;//unreachable code detected :D
-                    //        //case DefaultAction.Enforce:
-                    //        //    break;
-                    //        //case DefaultAction.None:
-                    //        //    break;
-                    //    default:
-                    //        break;
-                    //}
+                    Console.WriteLine($"Process {Name} exited with error code {returnCode} which differs from expected code {ExpectCode}");
                 }
             }
 
